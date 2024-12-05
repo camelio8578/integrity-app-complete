@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import VerificationForm from "@/components/VerificationForm";
 import { toast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
 
 declare global {
   interface Window {
@@ -14,6 +15,11 @@ declare global {
           username: string;
         };
       }>;
+      createPayment: (payment: {
+        amount: number;
+        memo: string;
+        metadata: object;
+      }) => Promise<any>;
     };
   }
 }
@@ -46,7 +52,7 @@ const Index = () => {
         return;
       }
 
-      const auth = await window.Pi.authenticate(["username"], () => {
+      const auth = await window.Pi.authenticate(["username", "payments"], () => {
         console.log("Handling incomplete payment...");
         return Promise.resolve();
       });
@@ -63,6 +69,38 @@ const Index = () => {
       toast({
         title: "Authentication Failed",
         description: "Could not connect to Pi Network",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePayment = async () => {
+    if (!window.Pi) {
+      toast({
+        title: "Development Mode",
+        description: "Payments are only available in Pi Browser",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const payment = await window.Pi.createPayment({
+        amount: 1, // 1 Pi
+        memo: "Test payment for Integrity app",
+        metadata: { type: "test_payment" }
+      });
+      
+      console.log("Payment created:", payment);
+      toast({
+        title: "Payment Initiated",
+        description: "Please complete the payment in Pi Browser",
+      });
+    } catch (error) {
+      console.error("Payment failed:", error);
+      toast({
+        title: "Payment Failed",
+        description: "Could not create payment",
         variant: "destructive",
       });
     }
@@ -88,7 +126,19 @@ const Index = () => {
         username={username}
       />
       {!showForm ? (
-        <Hero onGetStarted={handleGetStarted} />
+        <div>
+          <Hero onGetStarted={handleGetStarted} />
+          {isAuthenticated && (
+            <div className="text-center mt-4">
+              <Button 
+                onClick={handlePayment}
+                className="bg-secondary hover:bg-secondary/90 text-primary font-semibold"
+              >
+                Send 1 Pi Test Payment
+              </Button>
+            </div>
+          )}
+        </div>
       ) : (
         <div className="container mx-auto py-16">
           <VerificationForm />
