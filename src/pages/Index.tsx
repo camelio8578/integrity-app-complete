@@ -8,7 +8,10 @@ import { Button } from "@/components/ui/button";
 declare global {
   interface Window {
     Pi?: {
-      authenticate: (scopes: string[], onIncompletePaymentFound: (payment: any) => void) => Promise<{
+      authenticate: (
+        scopes: string[],
+        onIncompletePaymentFound: (payment: any) => void
+      ) => Promise<{
         accessToken: string;
         user: {
           uid: string;
@@ -20,6 +23,7 @@ declare global {
         memo: string;
         metadata: object;
       }) => Promise<any>;
+      openShareDialog: (title: string, message: string) => Promise<void>;
     };
   }
 }
@@ -52,7 +56,8 @@ const Index = () => {
         return;
       }
 
-      const auth = await window.Pi.authenticate(["username", "payments"], () => {
+      const scopes = ["username", "payments", "wallet_address"];
+      const auth = await window.Pi.authenticate(scopes, () => {
         console.log("Handling incomplete payment...");
         return Promise.resolve();
       });
@@ -86,9 +91,9 @@ const Index = () => {
 
     try {
       const payment = await window.Pi.createPayment({
-        amount: 1, // 1 Pi
+        amount: 1,
         memo: "Test payment for Integrity app",
-        metadata: { type: "test_payment" }
+        metadata: { type: "verification_payment" }
       });
       
       console.log("Payment created:", payment);
@@ -101,6 +106,31 @@ const Index = () => {
       toast({
         title: "Payment Failed",
         description: "Could not create payment",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    if (!window.Pi) {
+      toast({
+        title: "Development Mode",
+        description: "Sharing is only available in Pi Browser",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await window.Pi.openShareDialog(
+        "Integrity App",
+        "Verify and validate with confidence on Pi Network!"
+      );
+    } catch (error) {
+      console.error("Share failed:", error);
+      toast({
+        title: "Share Failed",
+        description: "Could not open share dialog",
         variant: "destructive",
       });
     }
@@ -129,12 +159,19 @@ const Index = () => {
         <div>
           <Hero onGetStarted={handleGetStarted} />
           {isAuthenticated && (
-            <div className="text-center mt-4">
+            <div className="flex flex-col items-center gap-4 mt-4">
               <Button 
                 onClick={handlePayment}
                 className="bg-secondary hover:bg-secondary/90 text-primary font-semibold"
               >
                 Send 1 Pi Test Payment
+              </Button>
+              <Button 
+                onClick={handleShare}
+                variant="outline"
+                className="text-primary font-semibold"
+              >
+                Share App
               </Button>
             </div>
           )}

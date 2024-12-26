@@ -3,11 +3,42 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { toast } from "@/components/ui/use-toast";
 
 const VerificationForm = () => {
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Form submitted");
+
+    if (!window.Pi) {
+      toast({
+        title: "Development Mode",
+        description: "Verification payments are only available in Pi Browser",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const payment = await window.Pi.createPayment({
+        amount: 1,
+        memo: "Document verification payment",
+        metadata: { type: "document_verification" }
+      });
+      
+      console.log("Verification payment created:", payment);
+      toast({
+        title: "Payment Initiated",
+        description: "Please complete the payment to submit your verification",
+      });
+    } catch (error) {
+      console.error("Verification payment failed:", error);
+      toast({
+        title: "Payment Failed",
+        description: "Could not process verification payment",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -36,7 +67,7 @@ const VerificationForm = () => {
           type="submit"
           className="w-full bg-primary hover:bg-primary-dark text-white"
         >
-          Submit for Verification
+          Submit & Pay 1π
         </Button>
       </form>
     </Card>

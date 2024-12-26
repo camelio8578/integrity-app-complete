@@ -11,7 +11,10 @@ const Header = ({ onAuthClick, isAuthenticated, username }: HeaderProps) => {
   return (
     <header className="w-full bg-primary py-4 px-6 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">Integrity</h1>
+        <div className="flex items-center space-x-2">
+          <h1 className="text-2xl font-bold text-white">Integrity</h1>
+          <span className="text-xs text-white/80">Powered by Pi Network</span>
+        </div>
         <div>
           {!isAuthenticated ? (
             <Button
