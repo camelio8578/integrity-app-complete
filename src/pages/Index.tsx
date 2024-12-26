@@ -32,14 +32,32 @@ const Index = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [isPiBrowser, setIsPiBrowser] = useState(false);
 
   useEffect(() => {
     console.log("Checking Pi SDK availability...");
-    if (window.Pi) {
-      console.log("Pi SDK is available");
-    } else {
-      console.log("Pi SDK not found - this is expected in development");
-    }
+    // Check if running in Pi Browser
+    const checkPiBrowser = async () => {
+      try {
+        if (window.Pi) {
+          console.log("Pi SDK is available");
+          setIsPiBrowser(true);
+        } else {
+          console.log("Pi SDK not found - this is expected in development");
+          setIsPiBrowser(false);
+          toast({
+            title: "Not in Pi Browser",
+            description: "Please open this app in Pi Browser for full functionality",
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        console.error("Error checking Pi Browser:", error);
+        setIsPiBrowser(false);
+      }
+    };
+
+    checkPiBrowser();
   }, []);
 
   const handlePiAuth = async () => {
