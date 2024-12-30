@@ -1,0 +1,40 @@
+// Import Pi SDK
+import { Pi } from '@minepi/pi-browser';
+
+const appId = "your-app-id"; // Replace with your Pi app ID
+
+// Initialize Pi Network SDK
+Pi.init({
+    version: "2.0",
+    sandbox: true, // Set to true for Testnet
+});
+
+// Function to start a test payment
+async function startPayment() {
+    try {
+        const paymentDetails = {
+            amount: 1, // Test payment amount in Pi
+            memo: "Test payment", // Description of the transaction
+            metadata: { purpose: "Testing payment integration" }, // Additional data
+        };
+
+        const payment = await Pi.createPayment(paymentDetails);
+
+        console.log("Payment initiated:", payment);
+
+        // Listen for payment completion
+        payment.onCompleted((tx) => {
+            console.log("Payment completed:", tx);
+        });
+
+        // Handle cancellations
+        payment.onCancelled(() => {
+            console.log("Payment was cancelled.");
+        });
+    } catch (error) {
+        console.error("Payment failed:", error);
+    }
+}
+
+// Call the payment function when needed
+document.getElementById("payButton").addEventListener("click", startPayment);
