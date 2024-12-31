@@ -67,3 +67,32 @@ Simply open [Lovable](https://lovable.dev/projects/f703a598-545c-4c3b-addf-feb98
 ## I want to use a custom domain - is that possible?
 
 We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+import os
+
+# Define the copyright notice
+COPYRIGHT_NOTICE = '''\
+/*
+ * Copyright (c) 2024 Your Name or Your Company
+ * All rights reserved.
+ */
+'''
+
+# Define the file extensions to process
+FILE_EXTENSIONS = ['.py', '.js', '.java', '.cpp', '.h']  # Add more as needed
+
+def add_copyright_notice(file_path):
+    with open(file_path, 'r+') as file:
+        content = file.read()
+        if COPYRIGHT_NOTICE not in content:
+            file.seek(0, 0)
+            file.write(COPYRIGHT_NOTICE + '\n' + content)
+
+def process_directory(directory):
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if any(file.endswith(ext) for ext in FILE_EXTENSIONS):
+                add_copyright_notice(os.path.join(root, file))
+
+if __name__ == "__main__":
+    directory_to_process = 'path/to/your/repo'  # Replace with the path to your repository
+    process_directory(directory_to_process)
